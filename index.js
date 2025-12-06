@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 const port = 3000;
 require("dotenv").config();
@@ -29,6 +29,7 @@ async function run() {
     await client.connect();
     const db = client.db("loanLInkDb");
     const loansCollection = db.collection("loans");
+    const applicationCollection = db.collection("applicationCollection");
     //Loans api
     app.get("/all-loans", async (req, res) => {
       const result = await loansCollection.find().toArray();
@@ -45,6 +46,36 @@ async function run() {
       //code deploy korar jonno test
       const result = await loansCollection.insertOne(data);
       res.send(result);
+    });
+    //for loan details
+    app.get("/all-loans/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+      const result = await loansCollection.findOne(query);
+
+      console.log(id);
+      res.send(result);
+    });
+    // post method from application
+    app.post("/application-loan", async (req, res) => {
+      try {
+        const loanData = req.body;
+        console.log("Received:", loanData);
+
+        // Example: Database e insert (MongoDB হলে)
+        const result = await applicationCollection.insertOne(loanData);
+
+        res.status(201).send({
+          success: true,
+          message: "Loan Data Received",
+          result: result,
+        });
+      } catch (error) {
+        res.status(500).send({
+          success: false,
+          message: "Server Error",
+        });
+      }
     });
 
     // Send a ping to confirm a successful connection
