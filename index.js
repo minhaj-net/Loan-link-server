@@ -30,6 +30,47 @@ async function run() {
     const db = client.db("loanLInkDb");
     const loansCollection = db.collection("loans");
     const applicationCollection = db.collection("applicationCollection");
+    const userCollection = db.collection("user");
+    //user related APIs
+    app.post("/user", async (req, res) => {
+      try {
+        const userData = req.body;
+        userData.created_at = new Date().toISOString();
+        userData.last_loggedIn = new Date().toISOString();
+        userData.role = "borrower";
+
+        const query = { email: userData.email };
+        const alreadyExists = await userCollection.findOne(query);
+        console.log("user already exits in database ", !!alreadyExists);
+        if (alreadyExists) {
+          console.log("Updatinf user info.........");
+          const result = await userCollection.updateOne(query, {
+            $set: {
+              last_loggedIn: new Date().toISOString(),
+            },
+          });
+          return res.send(result);
+        }
+
+        console.log("saving new user  info.........");
+        console.log(userData);
+        const result = await userCollection.insertOne(userData);
+
+        res.status(201).json({
+          success: true,
+          message: "User saved successfully",
+          result: result,
+        });
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+      }
+    });
+    app.get("/user/role/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await userCollection.findOne({ email });
+      res.send({ role: result?.role });
+    });
+
     //Loans api
     app.get("/all-loans", async (req, res) => {
       const result = await loansCollection.find().toArray();
