@@ -119,6 +119,19 @@ async function run() {
       }
     });
 
+    //update admin loan data
+    app.put("/all-loans/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: data,
+      };
+      const result = loansCollection.updateOne(query, update);
+
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
