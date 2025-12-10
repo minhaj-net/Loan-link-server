@@ -131,6 +131,22 @@ async function run() {
 
       res.send(result);
     });
+    //delete admin all loan
+    app.delete("/all-loans/:id", async (req, res) => {
+      const id = req.params.id;
+      try {
+        const result = await loansCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 1) {
+          res.status(200).json({ message: "Course deleted successfully" });
+        } else {
+          res.status(404).json({ message: "Course not found 404" });
+        }
+      } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
