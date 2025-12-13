@@ -106,6 +106,7 @@ async function run() {
     });
     app.post("/all-loans", async (req, res) => {
       const data = req.body;
+      data.createdAt = new Date().toISOString(); 
       // console.log(data);
       //code deploy korar jonno test
       const result = await loansCollection.insertOne(data);
