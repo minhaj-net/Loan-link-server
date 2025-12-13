@@ -71,6 +71,29 @@ async function run() {
       res.send({ role: result?.role });
     });
 
+    // get all users
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    // update user role and status
+    app.patch("/user/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const { role, status, suspendReason, suspendFeedback } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: role,
+          status: status,
+          suspendReason: suspendReason,
+          suspendFeedback: suspendFeedback,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     //Loans api
     app.get("/all-loans", async (req, res) => {
       const result = await loansCollection.find().toArray();
@@ -117,6 +140,10 @@ async function run() {
           message: "Server Error",
         });
       }
+    });
+    app.get("/application-loan", async (req, res) => {
+      const result = await applicationCollection.find().toArray();
+      res.send(result);
     });
 
     //update admin loan data
